@@ -1,0 +1,8 @@
+
+Just starting to play with the http://riscv.org instruction set.
+
+See the prior level README for a description on how to run this program.
+
+This program doesnt do much other than write a few locations and read
+one.  To see if we are actually running a program on silicon.
+

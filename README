@@ -1,0 +1,77 @@
+
+I just got my SiFive HiFive1 board today.
+
+https://www.sifive.com/products/hifive1/
+
+It is centered around the FE310-G000 part.
+
+It is perhaps the first, certainly my first risc-v based part.
+
+risc-v is an open instruction set which has gained some interest, will
+see if and when the patent lawsuits begin and how they play out.  Some
+of the companies that appear to be on board with this project are the
+ones that would normally be doing the suing.  So again we will see how
+this plays out.
+
+Like other similar instruction sets that you can buy and build into
+your chip (but unlike ARM) they have some number of options so if we
+see more silicion we are going to see an endless number of variants
+perhaps a toolchain nightmare, will see.
+
+This chip states it supports the RV32IMAC ISA options.
+
+https://riscv.org/
+
+Is the home of the risc-v ("risk five") instruction set definition, and
+documentation.  The documentation so far is quite lacking, could use
+a massive overhaul.  But for now very minimal assembly is required
+so we will rely on the toolchain.
+
+The toolchain, so far they maintain a fork of the gnu tools as well
+as others.  The SiFive folks have an sdk repo with what appears to be
+a copy of that toolchain, perhaps slightly older, going with one for
+now and will see.
+
+So far I really like the SiFive documentation, should have them re-write
+the instruction set manual, or write their own.  I like they have their
+tools and everything in one repo and it almost works as described in
+the getting started guide (building the demo doesnt work with their
+command, but I assume they will fix that).  It is overly complicated
+for my taste so for now I am going my way on this.
+
+As you can see from my patch, I am thorougly disgusted by this new
+habit of using abi register names, mips perhaps started it, it is
+starting to infect other instruction sets, you are basically not ready
+to write assembly language if you need this.  So as of this writing
+this patch works.  I may end up making my own tools repo derived from
+one of these others.  The riscv site has links to their main toolchain
+repo, the sifive folks have an openocd, which I will learn about
+someday to see if it is stock or they have added something for their
+device too it.  I hope that gnu binutils, gnu gcc, and openocd mainline
+repos get the support needed so we can go directly to them for tools
+for these products.
+
+The SiFive stuff may change, but as the time of this writing
+
+sudo apt-get install autoconf automake autotools-dev curl libmpc-dev libmpfr-dev libgmp-dev gawk build-essential bison flex texinfo gperf libtool patchutils bc
+
+git clone --recursive https://github.com/sifive/freedom-e-sdk.git
+cd freedom-e-sdk
+
+Then copy the build_riscv32 and riscv32-patch files from this
+repo to this freedom-e-sdk directory.
+
+I have an 8 core cpu if you dont you can comment out or change this
+line to match
+export JN='-j 8'
+it builds both the gnu tools and openocd
+
+sudo ./build_riscv32
+
+When the smoke clears you should have an /opt/riscv32 and an /opt/riscv32ocd
+
+PATH=/opt/riscv32/bin:$PATH
+
+Go to the hifive1/README next
+
+

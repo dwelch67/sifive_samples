@@ -1,0 +1,43 @@
+
+# Usage
+# sudo ./build_riscv32
+
+# Setup vars
+export TARGET=riscv32-unknown-elf
+export PREFIX=/opt/riscv32
+export PATH=$PATH:$PREFIX/bin
+export JN
+export JN='-j 8'
+
+#export EXTRA_STUFF='--with-arch=rv32imac --with-abi=ilp32'
+export EXTRA_STUFF=--with-arch=rv32imac
+
+rm -rf build-*
+
+# may have to touch this from time to time
+patch -p0 < riscv32-patch
+
+# Build binutils
+mkdir build-binutils
+cd build-binutils
+../riscv-gnu-toolchain/riscv-binutils-gdb/configure --target=$TARGET --prefix=$PREFIX $EXTRA_STUFF
+#echo "MAKEINFO = :" >> Makefile
+make $JN all
+make install
+
+# Build GCC
+mkdir ../build-gcc
+cd ../build-gcc
+../riscv-gnu-toolchain/riscv-gcc/configure --target=$TARGET --prefix=$PREFIX $EXTRA_STUFF --without-headers --with-newlib  --with-gnu-as --with-gnu-ld --enable-languages='c'
+make $JN all-gcc
+make install-gcc
+
+# Build libgcc.a
+#make $JN all-target-libgcc CFLAGS_FOR_TARGET="-g -O2"
+#make install-target-libgcc
+
+cd openocd
+./boostrap
+./configure --prefix=/opt/riscv32ocd
+make
+make install

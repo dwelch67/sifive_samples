@@ -1,0 +1,242 @@
+
+See the top level README for toolchain and other good info.
+
+This directory is specifically for the hifive1 board with the
+FE310-G000 part.
+
+https://www.sifive.com/products/hifive1/
+
+You will want the documentation that is there as well as the
+instruction set documentation from https://riscv.org the sifive folks
+have links to those docs.
+
+Their chip is based on the rv32imac, their examples use the ilp32
+abi but will see what the toolchain default is and how it works.
+I have to research/understand why they called it out specifically.
+
+void PUT32( unsigned int, unsigned int);
+unsigned int GET32 ( unsigned int );
+int notmain ( void )
+{
+    PUT32(0x80002000,0x12345678);
+    PUT32(0x80003000,GET32(0x80002000));
+    return(0);
+}
+
+Super simple example to help figure some important things out.
+
+riscv32-unknown-elf-gcc -O2 -c notmain.c -o notmain.o
+riscv32-unknown-elf-objdump -D notmain.o
+
+Disassembly of section .text:
+
+00000000 <notmain>:
+   0:   123455b7            lui x11,0x12345
+   4:   1141                    addi    x2,x2,-16
+   6:   67858593            addi    x11,x11,1656 # 12345678 <notmain+0x12345678>
+   a:   80002537            lui x10,0x80002
+   e:   c606                    sw  x1,12(x2)
+  10:   00000317            auipc   x6,0x0
+  14:   000300e7            jalr    x6
+  18:   80002537            lui x10,0x80002
+  1c:   00000317            auipc   x6,0x0
+  20:   000300e7            jalr    x6
+  24:   85aa                    mv  x11,x10
+  26:   80003537            lui x10,0x80003
+  2a:   00000317            auipc   x6,0x0
+  2e:   000300e7            jalr    x6
+  32:   40b2                    lw  x1,12(x2)
+  34:   4501                    li  x10,0
+  36:   0141                    addi    x2,x2,16
+  38:   8082                    ret
+
+Clearly a bug in their disassembly output, need to work on the spaces
+or tabs.
+
+riscv32-unknown-elf-gcc -O2 -march=rv32imac -c notmain.c -o notmain.o
+riscv32-unknown-elf-objdump -D notmain.o
+
+Disassembly of section .text:
+
+00000000 <notmain>:
+   0:   123455b7            lui x11,0x12345
+   4:   1141                    addi    x2,x2,-16
+   6:   67858593            addi    x11,x11,1656 # 12345678 <notmain+0x12345678>
+   a:   80002537            lui x10,0x80002
+   e:   c606                    sw  x1,12(x2)
+  10:   00000317            auipc   x6,0x0
+  14:   000300e7            jalr    x6
+  18:   80002537            lui x10,0x80002
+  1c:   00000317            auipc   x6,0x0
+  20:   000300e7            jalr    x6
+  24:   85aa                    mv  x11,x10
+  26:   80003537            lui x10,0x80003
+  2a:   00000317            auipc   x6,0x0
+  2e:   000300e7            jalr    x6
+  32:   40b2                    lw  x1,12(x2)
+  34:   4501                    li  x10,0
+  36:   0141                    addi    x2,x2,16
+  38:   8082                    ret
+
+riscv32-unknown-elf-gcc -O2 -march=rv32imac -mabi=ilp32 -c notmain.c -o notmain.o
+riscv32-unknown-elf-objdump -D notmain.o
+
+00000000 <notmain>:
+   0:   123455b7            lui x11,0x12345
+   4:   1141                    addi    x2,x2,-16
+   6:   67858593            addi    x11,x11,1656 # 12345678 <notmain+0x12345678>
+   a:   80002537            lui x10,0x80002
+   e:   c606                    sw  x1,12(x2)
+  10:   00000317            auipc   x6,0x0
+  14:   000300e7            jalr    x6
+  18:   80002537            lui x10,0x80002
+  1c:   00000317            auipc   x6,0x0
+  20:   000300e7            jalr    x6
+  24:   85aa                    mv  x11,x10
+  26:   80003537            lui x10,0x80003
+  2a:   00000317            auipc   x6,0x0
+  2e:   000300e7            jalr    x6
+  32:   40b2                    lw  x1,12(x2)
+  34:   4501                    li  x10,0
+  36:   0141                    addi    x2,x2,16
+  38:   8082                    ret
+
+So they all look the same to me, so perhaps neither the arch nor abi are
+required on the command line, since this toolchain was built for
+rv32imac.  I really hope you dont need a new gnu toolchain build for
+every little variant.
+
+Linked the tailend looks like this
+
+80000042:   80002537            lui x10,0x80002
+80000046:   37e1                    jal 8000000e <PUT32>
+80000048:   80002537            lui x10,0x80002
+8000004c:   37e1                    jal 80000014 <GET32>
+8000004e:   85aa                    mv  x11,x10
+80000050:   80003537            lui x10,0x80003
+80000054:   3f6d                    jal 8000000e <PUT32>
+
+Since I care to use PUT32/GET32 the abi shows that the first parameter
+is in x10 the second in x11 and the return is in x10 as well.
+
+So in theory:
+
+.globl PUT32
+PUT32:
+    sw x11,(x10)
+    ret
+
+.globl GET32
+GET32:
+    lw x10,(x10)
+    ret
+
+Did other C programs to see what load and store instructions were.
+
+So we are told that this chip has 16Kbytes of memory on chip at address
+0x80000000.  The SiFive folks have provided an openocd config which I
+have a copy here.
+
+Our first program is blinker00 which is not an led blinker, it is to
+see if we can do anything at all with this board/chip.  run make in that
+directory then come back.  You will need for now at least two windows
+open, perhaps three (minicom) or four (build window) eventually.
+
+In the first window from this directory
+
+/opt/riscv32ocd/bin/openocd -f openocd.cfg
+
+that is the openocd "server" it should not exit out, should have output
+that looks like this
+
+Open On-Chip Debugger 0.10.0-dev-gb7c778c-dirty (2017-02-13-22:26)
+Licensed under GNU GPL v2
+For bug reports, read
+    http://openocd.org/doc/doxygen/bugs.html
+adapter speed: 10000 kHz
+Info : auto-selecting first available session transport "jtag". To override use 'transport select <transport>'.
+Info : ftdi: if you experience problems at higher adapter clocks, try the command "ftdi_tdo_sample_edge falling"
+Info : clock speed 10000 kHz
+Info : JTAG tap: riscv.cpu tap/device found: 0x10e31913 (mfg: 0x489 (<unknown>), part: 0x0e31, ver: 0x1)
+halted at 0x404 due to software breakpoint
+Info : Examined RISCV core; XLEN=32, misa=0x40001105
+
+The second window doesnt matter what directory on this machine
+
+telnet localhost 4444
+
+And its output
+
+Trying 127.0.0.1...
+Connected to localhost.
+Escape character is '^]'.
+Open On-Chip Debugger
+>
+
+If you get that so far so good.  We will use the second window for these
+following commands
+
+> halt
+
+to halt the processor, it might already be halted from running openocd
+I dont like when they do that will edit my own script later.
+
+Actually that is better changed the openocd.cfg in this directory and now
+the first halt gives
+
+> halt
+riscv.cpu: target state: halted
+halted at 0x204000ce due to debug interrupt
+
+Much better.  The exact address will vary on what you have running on
+the flash and where in that program it is.  The flash is at 0x2040xxxx
+so it should be somewhere in there.
+
+Now lets load our program
+
+> load_image blinker00/notmain.elf
+100 bytes written at address 0x80000000
+downloaded 100 bytes in 0.000920s (106.148 KiB/s)
+>
+
+And run it
+
+> resume 0x80000000
+halted at 0x80000004 due to step
+riscv.cpu: target state: halted
+halted at 0x80000008 due to software breakpoint
+>
+
+We put a software breakpoint (sbreak now called ebreak I guess).
+
+So halt wont do anyting, had I not put the ebreak in there or if you
+comment it out the jump to self
+j .
+will be keeping it in a loop and the halt will stop it.
+
+Now lets see if it actually worked
+
+    for(ra=0;ra<20;ra+=4) PUT32(0x80001000+ra,ra);
+    PUT32(0x80002000,0x12345678);
+    PUT32(0x80003000,GET32(0x80002000));
+
+So lets look at 0x80001000
+
+> mdw 0x80001000 20
+0x80001000: 00000000 00000004 00000008 0000000c 00000010 3795123a d56f4170 927ea26e
+0x80001020: 446a0129 6e2acb7f 5c82974c 08204b5b 08d099ae 59da3d92 a89fe069 4c28e1bd
+0x80001040: c21d91fe 8bf12ec0 e14e9307 28e435b2
+
+Looks like our program may have written those first five values
+
+> mdw 0x80002000
+0x80002000: 12345678
+> mdw 0x80003000
+0x80003000: 12345678
+
+And it looks like we wrote to 0x80002000 and read 0x80002000 then wrote
+what we found to 0x80003000.
+
+So this is a huge sucess, our first risc-v program, run on silicon.
+
+Now to go and read the documentation on gpio pins and the uart, etc.
