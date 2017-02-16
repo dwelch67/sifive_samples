@@ -3,5 +3,5 @@ See higher level README files for more information on this product.
 
 Using the real time clock as a free running timer.
 
-Same as blinker03  0x80000 is 16 seconds.
+Same as blinker03  0x80000 is 16 seconds.  See blinker03 for explanation.
 
