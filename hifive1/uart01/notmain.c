@@ -28,18 +28,6 @@ unsigned int AMOSWAP ( unsigned int, unsigned int);
 
 #define MTIME 0x0200BFF8
 
-void delay ( unsigned int x )
-{
-    unsigned int ra;
-
-    ra=GET32(MTIME);
-    while(1)
-    {
-        if((GET32(MTIME)-ra)>=x) break;
-    }
-}
-
-
 //-------------------------------------------------------------------
 int notmain ( void )
 {
@@ -68,10 +56,10 @@ if(0)
     mt-=mc;
     mt<<=11;
     PUT32(0x80001000,mt);
-    //mdw 0x80001000             
+    //mdw 0x80001000
     //0x80001000: 0102e000
 }
-    
+
     //13.8M/115200 = 120
     //17M/115200 = 147.5
     //16m / 115200 = 139
@@ -90,7 +78,7 @@ if(0)
     PUT32(UART0_TXCTRL,0x00000003);
 
     AMOSWAP(UART0_TXDATA,0x55);
-    
+
 if(1)
 {
     for(ra=0;;ra++)

@@ -240,3 +240,14 @@ what we found to 0x80003000.
 So this is a huge sucess, our first risc-v program, run on silicon.
 
 Now to go and read the documentation on gpio pins and the uart, etc.
+
+Nice, love these SiFive folks...
+
+flash protect 0 64 last off
+program blinker00/flash/notmain.elf verify
+resume 0x20400000
+
+Excellent and that survives a power cycle and still runs right (memory
+contains the above values).  Now despite that is it bricked or can we
+still run other stuff?  Will see...
+
