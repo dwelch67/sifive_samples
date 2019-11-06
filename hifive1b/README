@@ -1,0 +1,65 @@
+See the top level README for toolchain and other good info.
+
+This directory is specifically for the hifive1 rev b board with the
+FE310-G002 part.
+
+https://www.sifive.com/boards/hifive1-rev-b
+
+You will want the documentation that is there as well as the
+instruction set documentation from https://riscv.org the sifive folks
+have links to those docs.
+
+It incorrectly says pre-order, you can order them now from crowdsupply
+(at the time of this writing)
+
+Their chip is based on the rv32imac, their examples use the ilp32
+abi but will see what the toolchain default is and how it works.
+I have to research/understand why they called it out specifically.
+
+I dont yet know the difference between the FE310-G000 part on the
+(rev a) hifive1 board and the FE310-G002 on this rev b board.
+
+For the original board I wrote more stuff.  It was supported by openocd
+so easy to get in and try stuff in ram.  This board has an mbed type
+approach (mbed "borrowed" that from an individual baremetal developer BTW)
+where a USB removable media shows up.  You copy your binary file (in
+this case intel hex format) to this drive and the on board debugger
+then halts the risc-v programs the flash, and releases it to run your
+application.
+
+So you are writing to the flash.  The sifive folks deliver it with a
+bootloader on flash, not sure yet what all this bootloader does but
+the documentation states that when it runs it branches to 0x20010000
+a different address than the original hifive1 board.  So you want
+to build your project for 0x20010000 (NOT 0x20000000!!).
+
+This board so far does not appear to be supported by openocd, am not
+interested in the seggar software/environment/tools so have not
+messed with them.  For now am strictly using the drag and drop method.
+
+The user leds appear to be the same as the original hifive1 board.
+See the blinker01 example first.  I have left the intermediate files
+and the notmain.hex file.  I struggled with this board and this example
+the drag and drop did not work at first I would get a FAIL.TXT file
+show up, could not commicate with the cpu.  Spent a good part of the
+evening looking around for examples with hex files and dug into their
+sandbox as it wouldnt work initially for me but figured out that all
+they were doing was what I was doing riscv...objcopy -O ihex.  Third
+time was a charm and it worked.  Not sure what unplugging/resetting or
+other fiddling of the board I did or timing of when I copied the file,
+etc made it work.    So maybe you have to hold your mouth right but
+I was able to get the file as left in blinker01 to work.
+
+Disturbingly their getting started guide uses a riscv64-unknown- gnu
+toolchain, to build for what is clearly an RV32 architecture part.
+That only serves to confuse people.  I am using an RV32 targetted
+gnu toolchain built using the script in my build_gcc repo.  There
+are other ways to get at a toolchain, this code should work with any
+of the riscv32-whatever- triplets as it is not specific to any.
+And it sounds like riscv64-whatever- triplets as well.
+
+There are now other much cheaper boards with sifive parts.  I actually
+have both the G000 and G002 versions, but I dont know where I put
+them.  If I figure that out and/or buy more will put some examples
+in this repo and figure out how to communicate with them, openocd or
+other.

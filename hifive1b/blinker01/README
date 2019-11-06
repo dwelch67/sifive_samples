@@ -1,0 +1,10 @@
+
+See higher level README files for more information on this product.
+
+The schematic shows an RGB led on gpio pins 19, 21 and 22.  They ground
+the led so making the gpio low makes that led light up and making the
+gpio high turns the led off.
+
+The reset state of the gpio appears to be all inputs, just forcing
+registers for all the gpio pins carelessly to get them blinking.
+
