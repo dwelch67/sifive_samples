@@ -1,0 +1,11 @@
+
+See higher level README files for more information on this product.
+
+This is really a clock example.  Switches to the 16Mhz oscillator,
+finding out that even though this one appears to be 17MHz from the
+RC oscillator, a divisor that works for a while one day doesnt work
+so well the next.  So switching to the external 16Mhz oscillator.
+
+Echos back what comes in.
+
+Skeleton for future RC oscillator based programs.

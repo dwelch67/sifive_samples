@@ -1,0 +1,24 @@
+
+See higher level README files for more information on this product.
+
+I really really like this UART.  Been waiting for one of these for a
+long time.  No frills, just does 8N1, set the divisor, enable, done.
+
+Saying that I slammed into a brick wall of failure for a while.  They
+say an amoswap instruction CAN be used.  Well couldnt get it to work
+without using it.  And not using it as a swap, that didnt work just
+using it to do the write.
+
+The nstop bit was interestingly set on reset, so tried with it clear,
+one stop bit, didnt work so well, with it set, works quite nicely.  So
+perhaps a bug or perhaps dont ask and just leave it set.
+
+Learned a little more like these core csr registers like mcycle which
+is a running cpu cycle counter.  (freerunning clock based on the
+cpu clock).  So with this built in interesting pll clock thing that
+says we should be around 13.8 or so MHz, well if you measure oscillator
+based mtime ticks to mcycle ticks, mine was over 16MHz almost 17MHz.
+There is a 16Mhz crystal on this board which I have not switched over
+to but using the 16Mhz divisor worked fine with the internal oscillator.
+So far.
+
