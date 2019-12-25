@@ -1,0 +1,106 @@
+
+notmain.elf:     file format elf32-littleriscv
+
+
+Disassembly of section .text:
+
+20010000 <_start>:
+20010000:	80004137          	lui	x2,0x80004
+20010004:	010000ef          	jal	x1,20010014 <notmain>
+20010008:	a001                	j	20010008 <_start+0x8>
+
+2001000a <dummy>:
+2001000a:	8082                	ret
+
+2001000c <PUT32>:
+2001000c:	c10c                	sw	x11,0(x10)
+2001000e:	8082                	ret
+
+20010010 <GET32>:
+20010010:	4108                	lw	x10,0(x10)
+20010012:	8082                	ret
+
+20010014 <notmain>:
+20010014:	1141                	addi	x2,x2,-16
+20010016:	c04a                	sw	x18,0(x2)
+20010018:	10012937          	lui	x18,0x10012
+2001001c:	03890513          	addi	x10,x18,56 # 10012038 <_start-0xfffdfc8>
+20010020:	c606                	sw	x1,12(x2)
+20010022:	c226                	sw	x9,4(x2)
+20010024:	c422                	sw	x8,8(x2)
+20010026:	37ed                	jal	20010010 <GET32>
+20010028:	fdf57593          	andi	x11,x10,-33
+2001002c:	03890513          	addi	x10,x18,56
+20010030:	3ff1                	jal	2001000c <PUT32>
+20010032:	00890513          	addi	x10,x18,8
+20010036:	3fe9                	jal	20010010 <GET32>
+20010038:	02056593          	ori	x11,x10,32
+2001003c:	00890513          	addi	x10,x18,8
+20010040:	37f1                	jal	2001000c <PUT32>
+20010042:	00c90513          	addi	x10,x18,12
+20010046:	37e9                	jal	20010010 <GET32>
+20010048:	02056593          	ori	x11,x10,32
+2001004c:	00c90513          	addi	x10,x18,12
+20010050:	3f75                	jal	2001000c <PUT32>
+20010052:	04090513          	addi	x10,x18,64
+20010056:	3f6d                	jal	20010010 <GET32>
+20010058:	fdf57593          	andi	x11,x10,-33
+2001005c:	001e84b7          	lui	x9,0x1e8
+20010060:	04090513          	addi	x10,x18,64
+20010064:	3765                	jal	2001000c <PUT32>
+20010066:	0931                	addi	x18,x18,12
+20010068:	48048493          	addi	x9,x9,1152 # 1e8480 <_start-0x1fe27b80>
+2001006c:	854a                	mv	x10,x18
+2001006e:	374d                	jal	20010010 <GET32>
+20010070:	02056593          	ori	x11,x10,32
+20010074:	854a                	mv	x10,x18
+20010076:	3f59                	jal	2001000c <PUT32>
+20010078:	4401                	li	x8,0
+2001007a:	8522                	mv	x10,x8
+2001007c:	0405                	addi	x8,x8,1
+2001007e:	3771                	jal	2001000a <dummy>
+20010080:	fe941de3          	bne	x8,x9,2001007a <notmain+0x66>
+20010084:	854a                	mv	x10,x18
+20010086:	3769                	jal	20010010 <GET32>
+20010088:	fdf57593          	andi	x11,x10,-33
+2001008c:	854a                	mv	x10,x18
+2001008e:	3fbd                	jal	2001000c <PUT32>
+20010090:	4401                	li	x8,0
+20010092:	8522                	mv	x10,x8
+20010094:	0405                	addi	x8,x8,1
+20010096:	3f95                	jal	2001000a <dummy>
+20010098:	fe941de3          	bne	x8,x9,20010092 <notmain+0x7e>
+2001009c:	bfc1                	j	2001006c <notmain+0x58>
+
+Disassembly of section .riscv.attributes:
+
+00000000 <.riscv.attributes>:
+   0:	2a41                	jal	190 <_start-0x2000fe70>
+   2:	0000                	unimp
+   4:	7200                	flw	f8,32(x12)
+   6:	7369                	lui	x6,0xffffa
+   8:	01007663          	bgeu	x0,x16,14 <_start-0x2000ffec>
+   c:	0020                	addi	x8,x2,8
+   e:	0000                	unimp
+  10:	1004                	addi	x9,x2,32
+  12:	7205                	lui	x4,0xfffe1
+  14:	3376                	fld	f6,376(x2)
+  16:	6932                	flw	f18,12(x2)
+  18:	7032                	flw	f0,44(x2)
+  1a:	5f30                	lw	x12,120(x14)
+  1c:	326d                	jal	fffff9c6 <notmain+0xdffef9b2>
+  1e:	3070                	fld	f12,224(x8)
+  20:	615f 7032 5f30      	0x5f307032615f
+  26:	30703263          	0x30703263
+	...
+
+Disassembly of section .comment:
+
+00000000 <.comment>:
+   0:	3a434347          	fmsub.d	f6,f6,f4,f7,rmm
+   4:	2820                	fld	f8,80(x8)
+   6:	29554e47          	fmsub.s	f28,f10,f21,f5,rmm
+   a:	3920                	fld	f8,112(x10)
+   c:	322e                	fld	f4,232(x2)
+   e:	302e                	fld	f0,232(x2)
+	...
